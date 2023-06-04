@@ -1,6 +1,6 @@
 <script>
     // @ts-nocheck
-    import { PlusCircle, XCircle } from "svelte-heros-v2";
+    import { PlusCircle, XCircle, PencilSquare } from "svelte-heros-v2";
 
     // Load data from +page.server.js
     $: ({ ingredients, recipe } = data);
@@ -34,7 +34,7 @@
     const handleAddStep = () => {
         if(step !== ""){
         // Update the step array.
-        steps = [...steps, step]
+        steps = [...steps, {value: step, editing: false}]
         // Reset the step input field. 
         step = ""
         }
@@ -43,6 +43,32 @@
     const handleRemoveStep = (stepToRemove) => {
         // Filter out the step to remove from the steps array.
         steps = steps.filter(step => step != stepToRemove)
+    }
+
+    const handleEditStep = (index) => {
+        // Get the current step, and set it to the intermediate variable.
+        editedStepValue = steps[index].value;
+        
+        // Close all other step edit windows.
+        steps.forEach(step => {
+            steps.editing = false;
+        });
+
+        // Enable editing mode for that particular step.
+        steps[index].editing = true;
+    }
+
+
+    const handleSaveStep = (index) => {
+        steps[index].value = editedStepValue
+
+        steps.forEach(step => {
+            step.editing = false;
+        });
+    }
+
+    function handleBlur(step) {
+         step.editing = false;
     }
 
     // Recipe General Info
@@ -54,13 +80,14 @@
     let count = 1;
 
     // Cooking directions
-    let steps = data.recipe.steps ?? []
+    let steps = data.recipe.steps.map((step) => ({value: step, editing: false})) ?? []
     let step = "" // Intermediate input field for array.
 
     let recipeIngredients = data.recipe.recipeIngredients ?? []
 
     let ingredientName = "" 
     let measurement = ""
+    let editedStepValue = ""
     let amount = 0
 </script>
 
@@ -101,7 +128,7 @@
 
             <input bind:value={amount} class="w-16" maxlength="3" type="number" >
             <select bind:value={measurement}>
-                <option value="" disabled selected>måleenhet</option>
+                <option value="" disabled selected>enhet</option>
                 <option value="ts">ts</option>
                 <option value="ss">ss</option>
                 <option value="g">g</option>
@@ -122,19 +149,26 @@
 
     <div class="flex-grow-1">
         <h1 class="text-2xl font-bold pb-5 topPaddingOnSmallScreens" >Slik gjør du</h1>
-            {#each steps as cookingStep, index}
-            <p class="text-xl p-4 max-w-lg">
-                
-                <span class="font-bold">{index + 1}. </span>{cookingStep} 
-                <button on:click={handleRemoveStep(cookingStep)}>
-                    <XCircle class="inline" />
-                </button>
-            </p>
-            {/each}
+        {#each steps as cookingStep, index (cookingStep)}
+        <p class="text-xl p-4 max-w-lg">
+          {#if cookingStep.editing}
+          <textarea rows=4 cols=120 class="text-xl p-4 max-w-lg" type="text" bind:value={editedStepValue} on:blur={handleBlur(cookingStep)} />
+          <button  on:click={() => handleSaveStep(index)} class="items-center self-center border border-black border-r-4 border-b-4  rounded-sm h-10 w-fit pr-4 pl-4 m-5" >
+            Lagre
+         </button>       
+          {:else}
+            <span class="font-bold">{index + 1}. </span>{cookingStep.value}
+            <button>
+              <XCircle on:click={() => handleRemoveStep(cookingStep)} class="inline" />
+              <PencilSquare on:click={() => handleEditStep(index)} class="inline" />
+            </button>
+          {/if}
+        </p>
+      {/each}
 
             <button class="pl-5">
                 <PlusCircle on:click={handleAddStep} class="inline" /> 
-                <input bind:value={step} placeholder="Legg til steg..">
+                <input bind:value={step} placeholder="Beskriv nytt steg her.">
             </button>
     
     </div>
@@ -173,6 +207,10 @@
     padding-top: 4rem;
   }
 
+}
+
+select, input{
+    border: none;
 }
 
 </style>
