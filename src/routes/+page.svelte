@@ -67,7 +67,7 @@
                     </tr>
 
                     <tr class="bg-white dark:bg-gray-800">
-                        <th scope="row" class="px-4 py-4 font-medium pl-12 text-gray-900 whitespace-nowrap dark:text-white">Kontroll over kostnade 📈</th>
+                        <th scope="row" class="px-4 py-4 font-medium pl-12 text-gray-900 whitespace-nowrap dark:text-white">Kontroll over kostnader 📈</th>
                         <td class="px-4 py-4 text-center"> ✅ </td>
                         <td class="px-4 py-4 text-center"> ❌ </td>
                         <td class="px-4 py-4 text-center"> ❌ </td>
